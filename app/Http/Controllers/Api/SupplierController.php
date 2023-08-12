@@ -65,7 +65,6 @@ class SupplierController extends Controller
     public function update(Request $request, $id)
     {
         $data = [];
-        $data = [];
         $data['name']           = $request->name;
         $data['email']          = $request->email;
         $data['phone']          = $request->phone;
