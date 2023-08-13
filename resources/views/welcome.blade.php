@@ -74,6 +74,18 @@
                             </div>
                         </div>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBootstrap3" aria-expanded="true" aria-controls="collapseBootstrap3">
+                            <i class="far fa-fw fa-window-maximize"></i>
+                            <span>Product</span>
+                        </a>
+                        <div id="collapseBootstrap3" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
+                            <div class="bg-white py-2 collapse-inner rounded">
+                                <router-link to="/store-product" class="collapse-item">Add Product</router-link>
+                                <router-link to="/product" class="collapse-item">All Product</router-link>
+                            </div>
+                        </div>
+                    </li>
 
 
 
