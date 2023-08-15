@@ -23,7 +23,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label for="exampleFormControlSelect1">Product Code</label>
-                                        <input type="email" class="form-control" placeholder="Enter Product Code" v-model="form.product_code">
+                                        <input type="text" class="form-control" placeholder="Enter Product Code" v-model="form.product_code">
                                         <small class="text-danger" v-if="errors.product_code">{{ errors.product_code[0] }}</small>
                                     </div>
                                 </div>
@@ -62,7 +62,7 @@
                                     </div>
                                     <div class="col-md-4">
                                         <label for="exampleFormControlSelect1">Product Selling Price</label>
-                                        <input type="email" class="form-control" placeholder="Enter Product Selling Price" v-model="form.selling_price">
+                                        <input type="text" class="form-control" placeholder="Enter Product Selling Price" v-model="form.selling_price">
                                         <small class="text-danger" v-if="errors.selling_price">{{ errors.selling_price[0] }}</small>
                                     </div>
                                 </div>

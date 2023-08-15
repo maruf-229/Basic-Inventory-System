@@ -2374,7 +2374,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     filterSearch: function filterSearch() {
       var _this = this;
       return this.employees.filter(function (employee) {
-        return employee.phone.match(_this.searchTerm);
+        return employee.phone.match(_this.searchTerm) || employee.name.match(_this.searchTerm);
       });
     }
   },
@@ -2545,26 +2545,39 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   data: function data() {
     return {
       form: {
-        name: '',
-        email: '',
-        phone: '',
-        salary: '',
-        address: '',
-        photo: '',
-        newphoto: '',
-        nid: '',
-        joining_date: ''
+        product_name: '',
+        product_code: '',
+        category_id: '',
+        supplier_id: '',
+        root: '',
+        buying_price: '',
+        selling_price: '',
+        buying_date: '',
+        image: '',
+        newimage: '',
+        product_quantity: ''
       },
-      errors: {}
+      errors: {},
+      categories: {},
+      suppliers: {}
     };
   }
 }, _defineProperty(_created$data$created, "created", function created() {
   var _this = this;
   var id = this.$route.params.id;
-  axios.get('/api/employee/' + id).then(function (_ref) {
+  axios.get('/api/product/' + id).then(function (_ref) {
     var data = _ref.data;
     return _this.form = data;
   })["catch"](console.log('error'));
+  axios.get('/api/category/').then(function (_ref2) {
+    var data = _ref2.data;
+    return _this.categories = data;
+  });
+  axios.get('/api/supplier/').then(function (_ref3) {
+    var data = _ref3.data;
+    return _this.suppliers = data;
+  });
+  console.log(this.categories);
 }), _defineProperty(_created$data$created, "methods", {
   onFileSelected: function onFileSelected(event) {
     var _this2 = this;
@@ -2574,17 +2587,17 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     } else {
       var reader = new FileReader();
       reader.onload = function (event) {
-        _this2.form.newphoto = event.target.result;
+        _this2.form.newimage = event.target.result;
       };
       reader.readAsDataURL(file);
     }
   },
-  employeeUpdate: function employeeUpdate() {
+  productUpdate: function productUpdate() {
     var _this3 = this;
     var id = this.$route.params.id;
-    axios.patch('/api/employee/' + id, this.form).then(function () {
+    axios.patch('/api/product/' + id, this.form).then(function () {
       _this3.$router.push({
-        name: 'employee'
+        name: 'product'
       });
       Notification.success();
     })["catch"](function (error) {
@@ -2618,27 +2631,27 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   },
   data: function data() {
     return {
-      employees: [],
+      products: [],
       searchTerm: ''
     };
   },
   computed: {
     filterSearch: function filterSearch() {
       var _this = this;
-      return this.employees.filter(function (employee) {
-        return employee.phone.match(_this.searchTerm);
+      return this.products.filter(function (product) {
+        return product.product_name.match(_this.searchTerm) || product.product_code.match(_this.searchTerm);
       });
     }
   },
   methods: {
-    allEmployee: function allEmployee() {
+    allProducts: function allProducts() {
       var _this2 = this;
-      axios.get('/api/employee/').then(function (_ref) {
+      axios.get('/api/product/').then(function (_ref) {
         var data = _ref.data;
-        return _this2.employees = data;
+        return _this2.products = data;
       })["catch"]();
     },
-    deleteEmployee: function deleteEmployee(id) {
+    deleteProduct: function deleteProduct(id) {
       var _this3 = this;
       Swal.fire({
         title: 'Are you sure?',
@@ -2650,13 +2663,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         confirmButtonText: 'Yes, delete it!'
       }).then(function (result) {
         if (result.isConfirmed) {
-          axios["delete"]('/api/employee/' + id).then(function () {
-            _this3.employees = _this3.employees.filter(function (employee) {
-              return employee.id != id;
+          axios["delete"]('/api/product/' + id).then(function () {
+            _this3.products = _this3.products.filter(function (product) {
+              return product.id != id;
             });
           })["catch"](function () {
             _this3.$router.push({
-              name: 'employee'
+              name: 'product'
             });
           });
           Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
@@ -2665,7 +2678,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     }
   }
 }, "created", function created() {
-  this.allEmployee();
+  this.allProducts();
 }));
 
 /***/ }),
@@ -4930,7 +4943,7 @@ var render = function render() {
     }],
     staticClass: "form-control",
     attrs: {
-      type: "email",
+      type: "text",
       placeholder: "Enter Product Code"
     },
     domProps: {
@@ -5099,7 +5112,7 @@ var render = function render() {
     }],
     staticClass: "form-control",
     attrs: {
-      type: "email",
+      type: "text",
       placeholder: "Enter Product Selling Price"
     },
     domProps: {
@@ -5256,9 +5269,9 @@ var render = function render() {
   }, [_c("router-link", {
     staticClass: "btn btn-primary",
     attrs: {
-      to: "/employee"
+      to: "/product"
     }
-  }, [_vm._v("All Employee")])], 1), _vm._v(" "), _c("div", {
+  }, [_vm._v("All Product")])], 1), _vm._v(" "), _c("div", {
     staticClass: "row justify-content-center"
   }, [_c("div", {
     staticClass: "col-xl-12 col-lg-12 col-md-12"
@@ -5280,7 +5293,7 @@ var render = function render() {
     on: {
       submit: function submit($event) {
         $event.preventDefault();
-        return _vm.employeeUpdate.apply(null, arguments);
+        return _vm.productUpdate.apply(null, arguments);
       }
     }
   }, [_c("div", {
@@ -5289,194 +5302,293 @@ var render = function render() {
     staticClass: "form-row"
   }, [_c("div", {
     staticClass: "col-md-6"
-  }, [_c("input", {
+  }, [_c("label", {
+    attrs: {
+      "for": "exampleFormControlSelect1"
+    }
+  }, [_vm._v("Product Name")]), _vm._v(" "), _c("input", {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.form.name,
-      expression: "form.name"
+      value: _vm.form.product_name,
+      expression: "form.product_name"
     }],
     staticClass: "form-control",
     attrs: {
       type: "text",
-      placeholder: "Enter Employee Full Name"
+      placeholder: "Enter Product Name"
     },
     domProps: {
-      value: _vm.form.name
+      value: _vm.form.product_name
     },
     on: {
       input: function input($event) {
         if ($event.target.composing) return;
-        _vm.$set(_vm.form, "name", $event.target.value);
+        _vm.$set(_vm.form, "product_name", $event.target.value);
       }
     }
-  }), _vm._v(" "), _vm.errors.name ? _c("small", {
+  }), _vm._v(" "), _vm.errors.product_name ? _c("small", {
     staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.name[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.errors.product_name[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
     staticClass: "col-md-6"
-  }, [_c("input", {
+  }, [_c("label", {
+    attrs: {
+      "for": "exampleFormControlSelect1"
+    }
+  }, [_vm._v("Product Code")]), _vm._v(" "), _c("input", {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.form.email,
-      expression: "form.email"
+      value: _vm.form.product_code,
+      expression: "form.product_code"
     }],
     staticClass: "form-control",
     attrs: {
-      type: "email",
-      placeholder: "Enter Employee Email Address"
+      type: "text",
+      placeholder: "Enter Product Code"
     },
     domProps: {
-      value: _vm.form.email
+      value: _vm.form.product_code
     },
     on: {
       input: function input($event) {
         if ($event.target.composing) return;
-        _vm.$set(_vm.form, "email", $event.target.value);
+        _vm.$set(_vm.form, "product_code", $event.target.value);
       }
     }
-  }), _vm._v(" "), _vm.errors.email ? _c("small", {
+  }), _vm._v(" "), _vm.errors.product_code ? _c("small", {
     staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.email[0]))]) : _vm._e()])])]), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.errors.product_code[0]))]) : _vm._e()])])]), _vm._v(" "), _c("div", {
     staticClass: "form-group"
   }, [_c("div", {
     staticClass: "form-row"
   }, [_c("div", {
     staticClass: "col-md-6"
-  }, [_c("input", {
+  }, [_c("label", {
+    attrs: {
+      "for": "exampleFormControlSelect1"
+    }
+  }, [_vm._v("Product Category")]), _vm._v(" "), _c("select", {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.form.address,
-      expression: "form.address"
+      value: _vm.form.category_id,
+      expression: "form.category_id"
     }],
     staticClass: "form-control",
     attrs: {
-      type: "text",
-      placeholder: "Enter Employee Full Address"
-    },
-    domProps: {
-      value: _vm.form.address
+      id: "exampleFormControlSelect1"
     },
     on: {
-      input: function input($event) {
-        if ($event.target.composing) return;
-        _vm.$set(_vm.form, "address", $event.target.value);
+      change: function change($event) {
+        var $$selectedVal = Array.prototype.filter.call($event.target.options, function (o) {
+          return o.selected;
+        }).map(function (o) {
+          var val = "_value" in o ? o._value : o.value;
+          return val;
+        });
+        _vm.$set(_vm.form, "category_id", $event.target.multiple ? $$selectedVal : $$selectedVal[0]);
       }
     }
-  }), _vm._v(" "), _vm.errors.address ? _c("small", {
+  }, _vm._l(_vm.categories, function (category) {
+    return _c("option", {
+      key: category.id,
+      domProps: {
+        value: category.id
+      }
+    }, [_vm._v(_vm._s(category.category_name))]);
+  }), 0), _vm._v(" "), _vm.errors.address ? _c("small", {
     staticClass: "text-danger"
   }, [_vm._v(_vm._s(_vm.errors.address[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
     staticClass: "col-md-6"
-  }, [_c("input", {
+  }, [_c("label", {
+    attrs: {
+      "for": "exampleFormControlSelect1"
+    }
+  }, [_vm._v("Product Supplier")]), _vm._v(" "), _c("select", {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.form.salary,
-      expression: "form.salary"
+      value: _vm.form.supplier_id,
+      expression: "form.supplier_id"
     }],
     staticClass: "form-control",
     attrs: {
-      type: "text",
-      placeholder: "Enter Employee Salary"
-    },
-    domProps: {
-      value: _vm.form.salary
+      id: "exampleFormControlSelect1"
     },
     on: {
-      input: function input($event) {
-        if ($event.target.composing) return;
-        _vm.$set(_vm.form, "salary", $event.target.value);
+      change: function change($event) {
+        var $$selectedVal = Array.prototype.filter.call($event.target.options, function (o) {
+          return o.selected;
+        }).map(function (o) {
+          var val = "_value" in o ? o._value : o.value;
+          return val;
+        });
+        _vm.$set(_vm.form, "supplier_id", $event.target.multiple ? $$selectedVal : $$selectedVal[0]);
       }
     }
-  }), _vm._v(" "), _vm.errors.salary ? _c("small", {
+  }, _vm._l(_vm.suppliers, function (supplier) {
+    return _c("option", {
+      key: supplier.id,
+      domProps: {
+        value: supplier.id
+      }
+    }, [_vm._v(_vm._s(supplier.name))]);
+  }), 0), _vm._v(" "), _vm.errors.salary ? _c("small", {
     staticClass: "text-danger"
   }, [_vm._v(_vm._s(_vm.errors.salary[0]))]) : _vm._e()])])]), _vm._v(" "), _c("div", {
     staticClass: "form-group"
   }, [_c("div", {
     staticClass: "form-row"
   }, [_c("div", {
-    staticClass: "col-md-6"
-  }, [_c("input", {
-    directives: [{
-      name: "model",
-      rawName: "v-model",
-      value: _vm.form.joining_date,
-      expression: "form.joining_date"
-    }],
-    staticClass: "form-control",
+    staticClass: "col-md-4"
+  }, [_c("label", {
     attrs: {
-      type: "date",
-      placeholder: "Enter Employee Joining Date"
-    },
-    domProps: {
-      value: _vm.form.joining_date
-    },
-    on: {
-      input: function input($event) {
-        if ($event.target.composing) return;
-        _vm.$set(_vm.form, "joining_date", $event.target.value);
-      }
+      "for": "exampleFormControlSelect1"
     }
-  }), _vm._v(" "), _vm.errors.joining_date ? _c("small", {
-    staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.joining_date[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
-    staticClass: "col-md-6"
-  }, [_c("input", {
+  }, [_vm._v("Product Root")]), _vm._v(" "), _c("input", {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.form.nid,
-      expression: "form.nid"
+      value: _vm.form.root,
+      expression: "form.root"
     }],
     staticClass: "form-control",
     attrs: {
       type: "text",
-      placeholder: "Enter Employee NID No."
+      placeholder: "Enter Product Root"
     },
     domProps: {
-      value: _vm.form.nid
+      value: _vm.form.root
     },
     on: {
       input: function input($event) {
         if ($event.target.composing) return;
-        _vm.$set(_vm.form, "nid", $event.target.value);
+        _vm.$set(_vm.form, "root", $event.target.value);
       }
     }
-  }), _vm._v(" "), _vm.errors.nid ? _c("small", {
+  }), _vm._v(" "), _vm.errors.root ? _c("small", {
     staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.nid[0]))]) : _vm._e()])])]), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.errors.root[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
+    staticClass: "col-md-4"
+  }, [_c("label", {
+    attrs: {
+      "for": "exampleFormControlSelect1"
+    }
+  }, [_vm._v("Product Buying Price")]), _vm._v(" "), _c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.form.buying_price,
+      expression: "form.buying_price"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      type: "text",
+      placeholder: "Enter Product Buying Price"
+    },
+    domProps: {
+      value: _vm.form.buying_price
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+        _vm.$set(_vm.form, "buying_price", $event.target.value);
+      }
+    }
+  }), _vm._v(" "), _vm.errors.buying_price ? _c("small", {
+    staticClass: "text-danger"
+  }, [_vm._v(_vm._s(_vm.errors.buying_price[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
+    staticClass: "col-md-4"
+  }, [_c("label", {
+    attrs: {
+      "for": "exampleFormControlSelect1"
+    }
+  }, [_vm._v("Product Selling Price")]), _vm._v(" "), _c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.form.selling_price,
+      expression: "form.selling_price"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      type: "text",
+      placeholder: "Enter Product Selling Price"
+    },
+    domProps: {
+      value: _vm.form.selling_price
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+        _vm.$set(_vm.form, "selling_price", $event.target.value);
+      }
+    }
+  }), _vm._v(" "), _vm.errors.selling_price ? _c("small", {
+    staticClass: "text-danger"
+  }, [_vm._v(_vm._s(_vm.errors.selling_price[0]))]) : _vm._e()])])]), _vm._v(" "), _c("div", {
     staticClass: "form-group"
   }, [_c("div", {
     staticClass: "form-row"
   }, [_c("div", {
     staticClass: "col-md-6"
-  }, [_c("input", {
+  }, [_c("label", {
+    attrs: {
+      "for": "exampleFormControlSelect1"
+    }
+  }, [_vm._v("Product Buying Date")]), _vm._v(" "), _c("input", {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.form.phone,
-      expression: "form.phone"
+      value: _vm.form.buying_date,
+      expression: "form.buying_date"
     }],
     staticClass: "form-control",
     attrs: {
-      type: "text",
-      placeholder: "Enter Employee Contact Number"
+      type: "date"
     },
     domProps: {
-      value: _vm.form.phone
+      value: _vm.form.buying_date
     },
     on: {
       input: function input($event) {
         if ($event.target.composing) return;
-        _vm.$set(_vm.form, "phone", $event.target.value);
+        _vm.$set(_vm.form, "buying_date", $event.target.value);
       }
     }
-  }), _vm._v(" "), _vm.errors.phone ? _c("small", {
+  }), _vm._v(" "), _vm.errors.buying_date ? _c("small", {
     staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.phone[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.errors.buying_date[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
     staticClass: "col-md-6"
-  })])]), _vm._v(" "), _c("div", {
+  }, [_c("label", {
+    attrs: {
+      "for": "exampleFormControlSelect1"
+    }
+  }, [_vm._v("Product Quantity")]), _vm._v(" "), _c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.form.product_quantity,
+      expression: "form.product_quantity"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      type: "number",
+      placeholder: "Enter Product Quantity"
+    },
+    domProps: {
+      value: _vm.form.product_quantity
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+        _vm.$set(_vm.form, "product_quantity", $event.target.value);
+      }
+    }
+  }), _vm._v(" "), _vm.errors.product_quantity ? _c("small", {
+    staticClass: "text-danger"
+  }, [_vm._v(_vm._s(_vm.errors.product_quantity[0]))]) : _vm._e()])])]), _vm._v(" "), _c("div", {
     staticClass: "form-group"
   }, [_c("div", {
     staticClass: "form-row"
@@ -5493,9 +5605,9 @@ var render = function render() {
     on: {
       change: _vm.onFileSelected
     }
-  }), _vm._v(" "), _vm.errors.photo ? _c("small", {
+  }), _vm._v(" "), _vm.errors.image ? _c("small", {
     staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.photo[0]))]) : _vm._e(), _vm._v(" "), _c("label", {
+  }, [_vm._v(_vm._s(_vm.errors.image[0]))]) : _vm._e(), _vm._v(" "), _c("label", {
     staticClass: "custom-file-label",
     attrs: {
       "for": "customFile"
@@ -5508,7 +5620,7 @@ var render = function render() {
       width: "40px"
     },
     attrs: {
-      src: _vm.form.photo
+      src: _vm.form.image
     }
   })])])]), _vm._v(" "), _vm._m(1), _vm._v(" "), _c("hr")]), _vm._v(" "), _c("div", {
     staticClass: "text-center"
@@ -5521,7 +5633,7 @@ var staticRenderFns = [function () {
     staticClass: "text-center"
   }, [_c("h1", {
     staticClass: "h4 text-gray-900 mb-4"
-  }, [_vm._v("Employee Update")])]);
+  }, [_vm._v("Product Update")])]);
 }, function () {
   var _vm = this,
     _c = _vm._self._c;
@@ -5558,9 +5670,9 @@ var render = function render() {
   }, [_c("router-link", {
     staticClass: "btn btn-primary",
     attrs: {
-      to: "/store-employee"
+      to: "/store-product"
     }
-  }, [_vm._v("Add Employee")])], 1), _vm._v(" "), _c("br"), _vm._v(" "), _c("input", {
+  }, [_vm._v("Add Product")])], 1), _vm._v(" "), _c("br"), _vm._v(" "), _c("input", {
     directives: [{
       name: "model",
       rawName: "v-model",
@@ -5594,22 +5706,22 @@ var render = function render() {
     staticClass: "table-responsive"
   }, [_c("table", {
     staticClass: "table align-items-center table-flush"
-  }, [_vm._m(1), _vm._v(" "), _c("tbody", _vm._l(_vm.filterSearch, function (employee) {
+  }, [_vm._m(1), _vm._v(" "), _c("tbody", _vm._l(_vm.filterSearch, function (product) {
     return _c("tr", {
-      key: employee.id
-    }, [_c("td", [_vm._v(_vm._s(employee.name))]), _vm._v(" "), _c("td", [_c("img", {
+      key: product.id
+    }, [_c("td", [_vm._v(_vm._s(product.product_name))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(product.product_code))]), _vm._v(" "), _c("td", [_c("img", {
       attrs: {
-        src: employee.photo,
+        src: product.image,
         id: "em_photo",
         alt: ""
       }
-    })]), _vm._v(" "), _c("td", [_vm._v(_vm._s(employee.phone))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(employee.salary))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(employee.joining_date))]), _vm._v(" "), _c("td", [_c("router-link", {
+    })]), _vm._v(" "), _c("td", [_vm._v(_vm._s(product.category_name))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(product.buying_price))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(product.selling_price))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(product.root))]), _vm._v(" "), _c("td", [_c("router-link", {
       staticClass: "btn btn-sm btn-primary",
       attrs: {
         to: {
-          name: "edit-employee",
+          name: "edit-product",
           params: {
-            id: employee.id
+            id: product.id
           }
         }
       }
@@ -5620,7 +5732,7 @@ var render = function render() {
       },
       on: {
         click: function click($event) {
-          return _vm.deleteEmployee(employee.id);
+          return _vm.deleteProduct(product.id);
         }
       }
     }, [_vm._v("Delete")])], 1)]);
@@ -5635,13 +5747,13 @@ var staticRenderFns = [function () {
     staticClass: "card-header py-3 d-flex flex-row align-items-center justify-content-between"
   }, [_c("h6", {
     staticClass: "m-0 font-weight-bold text-primary"
-  }, [_vm._v("Employee List")])]);
+  }, [_vm._v("Product List")])]);
 }, function () {
   var _vm = this,
     _c = _vm._self._c;
   return _c("thead", {
     staticClass: "thead-light"
-  }, [_c("tr", [_c("th", [_vm._v("Name")]), _vm._v(" "), _c("th", [_vm._v("Photo")]), _vm._v(" "), _c("th", [_vm._v("Phone")]), _vm._v(" "), _c("th", [_vm._v("Salary")]), _vm._v(" "), _c("th", [_vm._v("Joining Date")]), _vm._v(" "), _c("th", [_vm._v("Action")])])]);
+  }, [_c("tr", [_c("th", [_vm._v("Product Name")]), _vm._v(" "), _c("th", [_vm._v("Product Code")]), _vm._v(" "), _c("th", [_vm._v("Product Photo")]), _vm._v(" "), _c("th", [_vm._v("Product Category")]), _vm._v(" "), _c("th", [_vm._v("Buying Price")]), _vm._v(" "), _c("th", [_vm._v("Selleing Price")]), _vm._v(" "), _c("th", [_vm._v("Root")]), _vm._v(" "), _c("th", [_vm._v("Action")])])]);
 }];
 render._withStripped = true;
 

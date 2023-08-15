@@ -64,7 +64,7 @@ export default{
     computed:{
         filterSearch(){
             return this.employees.filter(employee =>{
-                return employee.phone.match(this.searchTerm)
+                return employee.phone.match(this.searchTerm) || employee.name.match(this.searchTerm)
             })
         }
     },
