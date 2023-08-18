@@ -22,8 +22,12 @@ Route::apiResource('/employee','Api\EmployeeController');
 Route::apiResource('/supplier','Api\SupplierController');
 Route::apiResource('/category','Api\CategoryController');
 Route::apiResource('/product','Api\ProductController');
+Route::post('/stock/update/{id}','Api\ProductController@updateStock');
 Route::apiResource('/expense','Api\ExpenseController');
 
 Route::post('/salary/paid/{id}','Api\SalaryController@paid');
 Route::get('/salary','Api\SalaryController@allSalary');
 Route::get('/salary/view/{id}','Api\SalaryController@viewSalary');
+Route::get('/salary/edit/{id}','Api\SalaryController@editSalary');
+Route::post('/salary/update/{id}','Api\SalaryController@updateSalary');
+
