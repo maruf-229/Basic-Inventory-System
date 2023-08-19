@@ -65,8 +65,7 @@
                     <form action="">
                         <label for="">Customer Name</label>
                         <select name="" id="" class="form-control" v-model="customer_id">
-                            <option value="">Maruf</option>
-                            <option value="">Riad</option>
+                            <option v-for="customer in customers" :key="customer.id">{{ customer.name }}</option>
                         </select>
 
                         <label for="">Pay</label>
@@ -76,7 +75,7 @@
                         <input type="text" class="form-control" required v-model="due">
 
                         <label for="">Pay By</label>
-                        <select name="" id="" class="form-control" v-model="customer_id">
+                        <select name="" id="" class="form-control" v-model="payBy">
                             <option value="Hand Cash">Hand Cash</option>
                             <option value="Cheque">Cheque</option>
                             <option value="Gift Cards">Gift Cards</option>
@@ -168,6 +167,7 @@ export default{
     created(){
         this.allProducts();
         this.allCategories();
+        this.allCustomers();
     },
     data(){
         return{
@@ -176,6 +176,8 @@ export default{
             getProducts:[],
             searchTerm:'',
             getSearchTerm:'',
+            customers:'',
+            errors:''
         }
     },
     computed:{
@@ -200,6 +202,11 @@ export default{
             axios.get('/api/category/')
             .then(({data}) => (this.categories = data))
             .catch()
+        },
+        allCustomers(){
+            axios.get('/api/customer/')
+            .then(({data}) => (this.customers = data))
+            .catch(console.log('error'))
         },
         subProduct(id){
             axios.get('/api/get_product/'+id)

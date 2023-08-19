@@ -2844,13 +2844,16 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
 }, _defineProperty(_created$created$data, "created", function created() {
   this.allProducts();
   this.allCategories();
+  this.allCustomers();
 }), _defineProperty(_created$created$data, "data", function data() {
   return {
     products: [],
     categories: [],
     getProducts: [],
     searchTerm: '',
-    getSearchTerm: ''
+    getSearchTerm: '',
+    customers: '',
+    errors: ''
   };
 }), _defineProperty(_created$created$data, "computed", {
   filterSearch: function filterSearch() {
@@ -2880,11 +2883,18 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       return _this4.categories = data;
     })["catch"]();
   },
-  subProduct: function subProduct(id) {
+  allCustomers: function allCustomers() {
     var _this5 = this;
-    axios.get('/api/get_product/' + id).then(function (_ref3) {
+    axios.get('/api/customer/').then(function (_ref3) {
       var data = _ref3.data;
-      return _this5.getProducts = data;
+      return _this5.customers = data;
+    })["catch"](console.log('error'));
+  },
+  subProduct: function subProduct(id) {
+    var _this6 = this;
+    axios.get('/api/get_product/' + id).then(function (_ref4) {
+      var data = _ref4.data;
+      return _this6.getProducts = data;
     })["catch"]();
   }
 }), _created$created$data);
@@ -6659,15 +6669,11 @@ var render = function render() {
         _vm.customer_id = $event.target.multiple ? $$selectedVal : $$selectedVal[0];
       }
     }
-  }, [_c("option", {
-    attrs: {
-      value: ""
-    }
-  }, [_vm._v("Maruf")]), _vm._v(" "), _c("option", {
-    attrs: {
-      value: ""
-    }
-  }, [_vm._v("Riad")])]), _vm._v(" "), _c("label", {
+  }, _vm._l(_vm.customers, function (customer) {
+    return _c("option", {
+      key: customer.id
+    }, [_vm._v(_vm._s(customer.name))]);
+  }), 0), _vm._v(" "), _c("label", {
     attrs: {
       "for": ""
     }
@@ -6725,8 +6731,8 @@ var render = function render() {
     directives: [{
       name: "model",
       rawName: "v-model",
-      value: _vm.customer_id,
-      expression: "customer_id"
+      value: _vm.payBy,
+      expression: "payBy"
     }],
     staticClass: "form-control",
     attrs: {
@@ -6741,7 +6747,7 @@ var render = function render() {
           var val = "_value" in o ? o._value : o.value;
           return val;
         });
-        _vm.customer_id = $event.target.multiple ? $$selectedVal : $$selectedVal[0];
+        _vm.payBy = $event.target.multiple ? $$selectedVal : $$selectedVal[0];
       }
     }
   }, [_c("option", {
@@ -7190,9 +7196,9 @@ var render = function render() {
         value: category.id
       }
     }, [_vm._v(_vm._s(category.category_name))]);
-  }), 0), _vm._v(" "), _vm.errors.address ? _c("small", {
+  }), 0), _vm._v(" "), _vm.errors.category_id ? _c("small", {
     staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.address[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.errors.category_id[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
     staticClass: "col-md-6"
   }, [_c("label", {
     attrs: {
@@ -7227,9 +7233,9 @@ var render = function render() {
         value: supplier.id
       }
     }, [_vm._v(_vm._s(supplier.name))]);
-  }), 0), _vm._v(" "), _vm.errors.salary ? _c("small", {
+  }), 0), _vm._v(" "), _vm.errors.supplier_id ? _c("small", {
     staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.salary[0]))]) : _vm._e()])])]), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.errors.supplier_id[0]))]) : _vm._e()])])]), _vm._v(" "), _c("div", {
     staticClass: "form-group"
   }, [_c("div", {
     staticClass: "form-row"

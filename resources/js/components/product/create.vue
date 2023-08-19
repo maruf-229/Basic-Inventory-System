@@ -36,14 +36,14 @@
                                         <select class="form-control" id="exampleFormControlSelect1" v-model="form.category_id">
                                             <option :value="category.id" v-for="category in categories" :key="category.id">{{ category.category_name }}</option>
                                         </select>
-                                        <small class="text-danger" v-if="errors.address">{{ errors.address[0] }}</small>
+                                        <small class="text-danger" v-if="errors.category_id">{{ errors.category_id[0] }}</small>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="exampleFormControlSelect1">Product Supplier</label>
                                         <select class="form-control" id="exampleFormControlSelect1" v-model="form.supplier_id">
                                             <option :value="supplier.id" v-for="supplier in suppliers" :key="supplier.id">{{ supplier.name }}</option>
                                         </select>
-                                        <small class="text-danger" v-if="errors.salary">{{ errors.salary[0] }}</small>
+                                        <small class="text-danger" v-if="errors.supplier_id">{{ errors.supplier_id[0] }}</small>
                                     </div>
                                 </div>
                             </div>
