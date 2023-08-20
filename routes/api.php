@@ -34,4 +34,11 @@ Route::get('/salary/edit/{id}','Api\SalaryController@editSalary');
 Route::post('/salary/update/{id}','Api\SalaryController@updateSalary');
 
 Route::get('/get_product/{id}','Api\PosController@get_product');
+//cart routes
+Route::get('/addToCart/{id}','Api\CartController@addToCart');
+Route::get('/cart/products','Api\CartController@cartProducts');
+Route::get('/removeItem/{id}','Api\CartController@removeProduct');
+Route::get('/increament/{id}','Api\CartController@cartInceament');
+Route::get('/decreament/{id}','Api\CartController@cartDecrement');
+Route::get('/vats','Api\CartController@getVat');
 

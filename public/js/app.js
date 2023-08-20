@@ -2842,9 +2842,15 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     }
   }
 }, _defineProperty(_created$created$data, "created", function created() {
+  var _this = this;
   this.allProducts();
   this.allCategories();
   this.allCustomers();
+  this.cartProducts();
+  this.vat();
+  Reload.$on('AfetrAdd', function () {
+    _this.cartProducts();
+  });
 }), _defineProperty(_created$created$data, "data", function data() {
   return {
     products: [],
@@ -2853,50 +2859,105 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     searchTerm: '',
     getSearchTerm: '',
     customers: '',
+    carts: [],
+    vats: '',
     errors: ''
   };
 }), _defineProperty(_created$created$data, "computed", {
   filterSearch: function filterSearch() {
-    var _this = this;
+    var _this2 = this;
     return this.products.filter(function (product) {
-      return product.product_name.match(_this.searchTerm) || product.product_code.match(_this.searchTerm);
+      return product.product_name.match(_this2.searchTerm) || product.product_code.match(_this2.searchTerm);
     });
   },
   getFilterSearch: function getFilterSearch() {
-    var _this2 = this;
+    var _this3 = this;
     return this.getProducts.filter(function (getProduct) {
-      return getProduct.product_name.match(_this2.getSearchTerm) || getProduct.product_code.match(_this2.getSearchTerm);
+      return getProduct.product_name.match(_this3.getSearchTerm) || getProduct.product_code.match(_this3.getSearchTerm);
     });
+  },
+  qty: function qty() {
+    var sum = 0;
+    for (var i = 0; i < this.carts.length; i++) {
+      sum += parseFloat(this.carts[i].product_qty);
+    }
+    return sum;
+  },
+  subtotal: function subtotal() {
+    var sum = 0;
+    for (var i = 0; i < this.carts.length; i++) {
+      sum += parseFloat(this.carts[i].subtotal);
+    }
+    return sum;
   }
 }), _defineProperty(_created$created$data, "methods", {
   allProducts: function allProducts() {
-    var _this3 = this;
+    var _this4 = this;
     axios.get('/api/product/').then(function (_ref) {
       var data = _ref.data;
-      return _this3.products = data;
+      return _this4.products = data;
     })["catch"]();
   },
   allCategories: function allCategories() {
-    var _this4 = this;
+    var _this5 = this;
     axios.get('/api/category/').then(function (_ref2) {
       var data = _ref2.data;
-      return _this4.categories = data;
+      return _this5.categories = data;
     })["catch"]();
   },
   allCustomers: function allCustomers() {
-    var _this5 = this;
+    var _this6 = this;
     axios.get('/api/customer/').then(function (_ref3) {
       var data = _ref3.data;
-      return _this5.customers = data;
+      return _this6.customers = data;
     })["catch"](console.log('error'));
   },
   subProduct: function subProduct(id) {
-    var _this6 = this;
+    var _this7 = this;
     axios.get('/api/get_product/' + id).then(function (_ref4) {
       var data = _ref4.data;
-      return _this6.getProducts = data;
+      return _this7.getProducts = data;
     })["catch"]();
-  }
+  },
+  //cart methods
+  addToCart: function addToCart(id) {
+    axios.get('/api/addToCart/' + id).then(function () {
+      Reload.$emit('AfetrAdd');
+      Notification.cart_success();
+    })["catch"]();
+  },
+  cartProducts: function cartProducts() {
+    var _this8 = this;
+    axios.get('/api/cart/products/').then(function (_ref5) {
+      var data = _ref5.data;
+      return _this8.carts = data;
+    })["catch"](console.log('error'));
+  },
+  removeItem: function removeItem(id) {
+    axios.get('/api/removeItem/' + id).then(function () {
+      Reload.$emit('AfetrAdd');
+      Notification.cart_delete();
+    })["catch"]();
+  },
+  increament: function increament(id) {
+    axios.get('/api/increament/' + id).then(function () {
+      Reload.$emit('AfetrAdd');
+      Notification.cart_success();
+    })["catch"]();
+  },
+  decreament: function decreament(id) {
+    axios.get('/api/decreament/' + id).then(function () {
+      Reload.$emit('AfetrAdd');
+      Notification.cart_success();
+    })["catch"]();
+  },
+  vat: function vat() {
+    var _this9 = this;
+    axios.get('/api/vats/').then(function (_ref6) {
+      var data = _ref6.data;
+      return _this9.vats = data;
+    })["catch"]();
+  } //end cart methods
 }), _created$created$data);
 
 /***/ }),
@@ -6636,9 +6697,67 @@ var render = function render() {
     staticClass: "col-xl-5 col-lg-5"
   }, [_c("div", {
     staticClass: "card mb-4"
-  }, [_vm._m(1), _vm._v(" "), _vm._m(2), _vm._v(" "), _c("div", {
+  }, [_vm._m(1), _vm._v(" "), _c("div", {
+    staticClass: "table-responsive"
+  }, [_c("table", {
+    staticClass: "table align-items-center table-flush"
+  }, [_vm._m(2), _vm._v(" "), _c("tbody", _vm._l(_vm.carts, function (cart) {
+    return _c("tr", {
+      key: cart.id
+    }, [_c("td", [_vm._v(_vm._s(cart.product_name))]), _vm._v(" "), _c("td", [cart.product_qty >= 2 ? _c("button", {
+      staticClass: "btn btn-sm btn-danger",
+      on: {
+        click: function click($event) {
+          $event.preventDefault();
+          return _vm.decreament(cart.id);
+        }
+      }
+    }, [_vm._v("-")]) : _c("button", {
+      staticClass: "btn btn-sm btn-danger",
+      attrs: {
+        disabled: ""
+      }
+    }, [_vm._v("-")]), _vm._v(" "), _c("input", {
+      attrs: {
+        type: "text",
+        id: "qty_input",
+        readonly: ""
+      },
+      domProps: {
+        value: cart.product_qty
+      }
+    }), _vm._v(" "), _c("button", {
+      staticClass: "btn btn-sm btn-success",
+      on: {
+        click: function click($event) {
+          $event.preventDefault();
+          return _vm.increament(cart.id);
+        }
+      }
+    }, [_vm._v("+")])]), _vm._v(" "), _c("td", [_vm._v(_vm._s(cart.product_price))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(cart.subtotal))]), _vm._v(" "), _c("td", [_c("a", {
+      staticClass: "btn btn-sm btn-primary",
+      staticStyle: {
+        color: "white"
+      },
+      on: {
+        click: function click($event) {
+          return _vm.removeItem(cart.id);
+        }
+      }
+    }, [_vm._v("X")])])]);
+  }), 0)])]), _vm._v(" "), _c("div", {
     staticClass: "card-footer"
-  }, [_vm._m(3), _vm._v(" "), _c("br"), _vm._v(" "), _c("form", {
+  }, [_c("ul", {
+    staticClass: "list-group"
+  }, [_c("li", {
+    staticClass: "list-group-item d-flex justify-content-between align-items-center"
+  }, [_vm._v("Total Quantity: "), _c("strong", [_vm._v(_vm._s(_vm.qty))])]), _vm._v(" "), _c("li", {
+    staticClass: "list-group-item d-flex justify-content-between align-items-center"
+  }, [_vm._v("Sub Total: "), _c("strong", [_vm._v("$" + _vm._s(_vm.subtotal))])]), _vm._v(" "), _c("li", {
+    staticClass: "list-group-item d-flex justify-content-between align-items-center"
+  }, [_vm._v("Vat: "), _c("strong", [_vm._v(_vm._s(_vm.vats.vat) + "%")])]), _vm._v(" "), _c("li", {
+    staticClass: "list-group-item d-flex justify-content-between align-items-center"
+  }, [_vm._v("Total: "), _c("strong", [_vm._v(_vm._s(_vm.subtotal * _vm.vats.vat / 100 + _vm.subtotal))])])]), _vm._v(" "), _c("br"), _vm._v(" "), _c("form", {
     attrs: {
       action: ""
     }
@@ -6771,13 +6890,13 @@ var render = function render() {
     staticClass: "col-xl-7 col-lg-7"
   }, [_c("div", {
     staticClass: "card mb-4"
-  }, [_vm._m(4), _vm._v(" "), _c("ul", {
+  }, [_vm._m(3), _vm._v(" "), _c("ul", {
     staticClass: "nav nav-tabs",
     attrs: {
       id: "myTab",
       role: "tablist"
     }
-  }, [_vm._m(5), _vm._v(" "), _vm._l(_vm.categories, function (category) {
+  }, [_vm._m(4), _vm._v(" "), _vm._l(_vm.categories, function (category) {
     return _c("li", {
       key: category.id,
       staticClass: "nav-item"
@@ -6841,9 +6960,13 @@ var render = function render() {
     return _c("div", {
       key: product.id,
       staticClass: "col-lg-3 col-md-3 col-sm-6 col-6"
-    }, [_c("a", {
-      attrs: {
-        href: "#"
+    }, [_c("button", {
+      staticClass: "btn btn-sm",
+      on: {
+        click: function click($event) {
+          $event.preventDefault();
+          return _vm.addToCart(product.id);
+        }
       }
     }, [_c("div", {
       staticClass: "card",
@@ -6906,9 +7029,13 @@ var render = function render() {
     return _c("div", {
       key: getProduct.id,
       staticClass: "col-lg-3 col-md-3 col-sm-6 col-6"
-    }, [_c("a", {
-      attrs: {
-        href: "#"
+    }, [_c("button", {
+      staticClass: "btn btn-sm",
+      on: {
+        click: function click($event) {
+          $event.preventDefault();
+          return _vm.addToCart(getProduct.id);
+        }
       }
     }, [_c("div", {
       staticClass: "card",
@@ -6971,54 +7098,9 @@ var staticRenderFns = [function () {
 }, function () {
   var _vm = this,
     _c = _vm._self._c;
-  return _c("div", {
-    staticClass: "table-responsive"
-  }, [_c("table", {
-    staticClass: "table align-items-center table-flush"
-  }, [_c("thead", {
+  return _c("thead", {
     staticClass: "thead-light"
-  }, [_c("tr", [_c("th", [_vm._v("Name")]), _vm._v(" "), _c("th", [_vm._v("Qty")]), _vm._v(" "), _c("th", [_vm._v("Unit")]), _vm._v(" "), _c("th", [_vm._v("Total")]), _vm._v(" "), _c("th", [_vm._v("Action")])])]), _vm._v(" "), _c("tbody", [_c("tr", [_c("td", [_c("a", {
-    attrs: {
-      href: "#"
-    }
-  }, [_vm._v("Name")])]), _vm._v(" "), _c("td", [_vm._v("Qty")]), _vm._v(" "), _c("td", [_vm._v("Unit")]), _vm._v(" "), _c("td", [_vm._v("Total")]), _vm._v(" "), _c("td", [_c("a", {
-    staticClass: "btn btn-sm btn-primary",
-    attrs: {
-      href: "#"
-    }
-  }, [_vm._v("X")])])]), _vm._v(" "), _c("tr", [_c("td", [_c("a", {
-    attrs: {
-      href: "#"
-    }
-  }, [_vm._v("Name")])]), _vm._v(" "), _c("td", [_vm._v("Qty")]), _vm._v(" "), _c("td", [_vm._v("Unit")]), _vm._v(" "), _c("td", [_vm._v("Total")]), _vm._v(" "), _c("td", [_c("a", {
-    staticClass: "btn btn-sm btn-primary",
-    attrs: {
-      href: "#"
-    }
-  }, [_vm._v("X")])])]), _vm._v(" "), _c("tr", [_c("td", [_c("a", {
-    attrs: {
-      href: "#"
-    }
-  }, [_vm._v("Name")])]), _vm._v(" "), _c("td", [_vm._v("Qty")]), _vm._v(" "), _c("td", [_vm._v("Unit")]), _vm._v(" "), _c("td", [_vm._v("Total")]), _vm._v(" "), _c("td", [_c("a", {
-    staticClass: "btn btn-sm btn-primary",
-    attrs: {
-      href: "#"
-    }
-  }, [_vm._v("X")])])])])])]);
-}, function () {
-  var _vm = this,
-    _c = _vm._self._c;
-  return _c("ul", {
-    staticClass: "list-group"
-  }, [_c("li", {
-    staticClass: "list-group-item d-flex justify-content-between align-items-center"
-  }, [_vm._v("Total Quantity: "), _c("strong", [_vm._v("56")])]), _vm._v(" "), _c("li", {
-    staticClass: "list-group-item d-flex justify-content-between align-items-center"
-  }, [_vm._v("Sub Total: "), _c("strong", [_vm._v("$5000")])]), _vm._v(" "), _c("li", {
-    staticClass: "list-group-item d-flex justify-content-between align-items-center"
-  }, [_vm._v("Vat: "), _c("strong", [_vm._v("35 %")])]), _vm._v(" "), _c("li", {
-    staticClass: "list-group-item d-flex justify-content-between align-items-center"
-  }, [_vm._v("Total: "), _c("strong", [_vm._v("5600")])])]);
+  }, [_c("tr", [_c("th", [_vm._v("Name")]), _vm._v(" "), _c("th", [_vm._v("Qty")]), _vm._v(" "), _c("th", [_vm._v("Unit")]), _vm._v(" "), _c("th", [_vm._v("Total")]), _vm._v(" "), _c("th", [_vm._v("Action")])])]);
 }, function () {
   var _vm = this,
     _c = _vm._self._c;
@@ -14053,7 +14135,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "\n#em_photo_pos[data-v-e7fc9010]{\n    height: 150px;\n    width: 214px;\n}\n", ""]);
+exports.push([module.i, "\n#em_photo_pos[data-v-e7fc9010]{\n    height: 150px;\n    width: 214px;\n}\n#qty_input[data-v-e7fc9010]{\n    width: 30px;\n}\n", ""]);
 
 // exports
 
@@ -68536,6 +68618,26 @@ var Notification = /*#__PURE__*/function () {
         timeout: 1000
       }).show();
     }
+  }, {
+    key: "cart_success",
+    value: function cart_success() {
+      new Noty({
+        type: 'success',
+        layout: 'topRight',
+        text: 'Successfully Added!!',
+        timeout: 1000
+      }).show();
+    }
+  }, {
+    key: "cart_delete",
+    value: function cart_delete() {
+      new Noty({
+        type: 'success',
+        layout: 'topRight',
+        text: 'Successfully Removed!!',
+        timeout: 1000
+      }).show();
+    }
   }]);
   return Notification;
 }();
@@ -68704,6 +68806,7 @@ var Toast = sweetalert2__WEBPACK_IMPORTED_MODULE_5___default.a.mixin({
   }
 });
 window.Toast = Toast;
+window.Reload = new vue__WEBPACK_IMPORTED_MODULE_0___default.a();
 var router = new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   routes: _routes__WEBPACK_IMPORTED_MODULE_2__["routes"],
   mode: 'history'

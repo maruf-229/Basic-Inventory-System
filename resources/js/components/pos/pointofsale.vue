@@ -30,36 +30,27 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><a href="#">Name</a></td>
-                                <td>Qty</td>
-                                <td>Unit</td>
-                                <td>Total</td>
-                                <td><a href="#" class="btn btn-sm btn-primary">X</a></td>
-                            </tr>
-                            <tr>
-                                <td><a href="#">Name</a></td>
-                                <td>Qty</td>
-                                <td>Unit</td>
-                                <td>Total</td>
-                                <td><a href="#" class="btn btn-sm btn-primary">X</a></td>
-                            </tr>
-                            <tr>
-                                <td><a href="#">Name</a></td>
-                                <td>Qty</td>
-                                <td>Unit</td>
-                                <td>Total</td>
-                                <td><a href="#" class="btn btn-sm btn-primary">X</a></td>
+                            <tr v-for="cart in carts" :key="cart.id">
+                                <td>{{ cart.product_name }}</td>
+                                <td>
+                                    <button @click.prevent="decreament(cart.id)" class="btn btn-sm btn-danger" v-if="cart.product_qty >= 2">-</button>
+                                    <button class="btn btn-sm btn-danger" v-else="" disabled>-</button>
+                                    <input type="text" id="qty_input" readonly :value="cart.product_qty">
+                                    <button @click.prevent="increament(cart.id)" class="btn btn-sm btn-success">+</button>
+                                </td>
+                                <td>{{ cart.product_price }}</td>
+                                <td>{{ cart.subtotal }}</td>
+                                <td><a style="color: white;" @click="removeItem(cart.id)" class="btn btn-sm btn-primary">X</a></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="card-footer">
                     <ul class="list-group">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Total Quantity: <strong>56</strong></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Sub Total: <strong>$5000</strong></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Vat: <strong>35 %</strong></li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">Total: <strong>5600</strong></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Total Quantity: <strong>{{ qty }}</strong></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Sub Total: <strong>${{ subtotal }}</strong></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Vat: <strong>{{ vats.vat }}%</strong></li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">Total: <strong>{{ subtotal*vats.vat/100 + subtotal }}</strong></li>
                     </ul>
                     <br>
                     <form action="">
@@ -110,7 +101,7 @@
                             <input type="text" v-model="searchTerm" class="form-control" style="width: 300px;" placeholder="Search Product"><br>
                             <div class="row">
                                 <div class="col-lg-3 col-md-3 col-sm-6 col-6" v-for="product in filterSearch" :key="product.id">
-                                    <a href="#">
+                                    <button class="btn btn-sm" @click.prevent="addToCart(product.id)">
                                         <div class="card" style="width: 13.5rem;margin-bottom: 5px;">
                                             <img :src="product.image" id="em_photo_pos" class="card-img-top" alt="...">
                                             <div class="card-body">
@@ -119,7 +110,7 @@
                                                 <span v-else=" " class="badge badge-danger">Stock-Out</span>
                                             </div>
                                         </div>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -130,7 +121,7 @@
                             <input type="text" v-model="getSearchTerm" class="form-control" style="width: 300px;" placeholder="Search Product"><br>
                             <div class="row">
                                 <div class="col-lg-3 col-md-3 col-sm-6 col-6" v-for="getProduct in getFilterSearch" :key="getProduct.id">
-                                    <a href="#">
+                                    <button class="btn btn-sm" @click.prevent="addToCart(getProduct.id)">
                                         <div class="card" style="width: 13.5rem;margin-bottom: 5px;">
                                             <img :src="getProduct.image" id="em_photo_pos" class="card-img-top" alt="...">
                                             <div class="card-body">
@@ -139,7 +130,7 @@
                                                 <span v-else=" " class="badge badge-danger">Stock-Out</span>
                                             </div>
                                         </div>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -168,6 +159,11 @@ export default{
         this.allProducts();
         this.allCategories();
         this.allCustomers();
+        this.cartProducts();
+        this.vat();
+        Reload.$on('AfetrAdd',() => {
+            this.cartProducts();
+        })
     },
     data(){
         return{
@@ -177,6 +173,8 @@ export default{
             searchTerm:'',
             getSearchTerm:'',
             customers:'',
+            carts:[],
+            vats:'',
             errors:''
         }
     },
@@ -190,6 +188,20 @@ export default{
             return this.getProducts.filter(getProduct =>{
                 return getProduct.product_name.match(this.getSearchTerm) || getProduct.product_code.match(this.getSearchTerm)
             })
+        },
+        qty(){
+            let sum = 0;
+            for(let i=0; i< this.carts.length; i++){
+                sum += (parseFloat(this.carts[i].product_qty));
+            }
+            return sum;
+        },
+        subtotal(){
+            let sum = 0;
+            for(let i=0; i< this.carts.length; i++){
+                sum += (parseFloat(this.carts[i].subtotal));
+            }
+            return sum;
         }
     },
     methods:{
@@ -213,6 +225,50 @@ export default{
             .then(({data}) => (this.getProducts = data))
             .catch()
         },
+        //cart methods
+        addToCart(id){
+            axios.get('/api/addToCart/'+id)
+            .then(() => {
+                Reload.$emit('AfetrAdd');
+                Notification.cart_success()
+            })
+            .catch()
+        },
+        cartProducts(){
+            axios.get('/api/cart/products/')
+            .then(({data}) => (this.carts = data))
+            .catch(console.log('error'))
+        },
+        removeItem(id){
+            axios.get('/api/removeItem/'+id)
+            .then(() => {
+                Reload.$emit('AfetrAdd');
+                Notification.cart_delete()
+            })
+            .catch()
+        },
+        increament(id){
+            axios.get('/api/increament/'+id)
+            .then(() => {
+                Reload.$emit('AfetrAdd');
+                Notification.cart_success()
+            })
+            .catch()
+        },
+        decreament(id){
+            axios.get('/api/decreament/'+id)
+            .then(() => {
+                Reload.$emit('AfetrAdd');
+                Notification.cart_success()
+            })
+            .catch()
+        },
+        vat(){
+            axios.get('/api/vats/')
+            .then(({data}) => (this.vats = data))
+            .catch()
+        },
+        //end cart methods
     }
 }
 </script>
@@ -221,5 +277,8 @@ export default{
     #em_photo_pos{
         height: 150px;
         width: 214px;
+    }
+    #qty_input{
+        width: 30px;
     }
 </style>
