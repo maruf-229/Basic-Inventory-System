@@ -18,5 +18,40 @@ class PosController extends Controller
             'customer_id' =>'required',
             'payBy' =>'required',
         ]);
+
+        $data = [];
+        $data['customer_id']    = $request->customer_id;
+        $data['qty']            = $request->qty;
+        $data['sub_total']      = $request->subtotal;
+        $data['vat']            = $request->vat;
+        $data['total']          = $request->total;
+        $data['pay']            = $request->pay;
+        $data['due']            = $request->due;
+        $data['payBy']          = $request->payBy;
+        $data['order_date']     = date('d/m/y');
+        $data['order_month']    = date('F');
+        $data['order_year']     = date('Y');
+
+        $order_id = DB::table('orders')->insertGetId($data);
+
+        $contents = DB::table('pos')->get();
+
+        $odata = [];
+
+        foreach($contents as $content){
+            $odata['order_id']          = $order_id;
+            $odata['product_id']        = $content->product_id;
+            $odata['product_qty']       = $content->product_qty;
+            $odata['product_price']     = $content->product_price;
+            $odata['subtotal']          = $content->subtotal;
+
+            DB::table('order_details')->insert($odata);
+
+            DB::table('products')->where('id',$content->product_id)->update([
+                'product_quantity' => DB::raw('product_quantity -'.$content->product_qty)
+            ]);
+        }
+
+        DB::table('pos')->delete();
     }
 }
