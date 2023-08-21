@@ -12,4 +12,11 @@ class PosController extends Controller
         $cat_products = DB::table('products')->where('category_id',$id)->get();
         return response()->json($cat_products);
     }
+
+    public function orderDone(Request $request){
+        $validateData = $request->validate([
+            'customer_id' =>'required',
+            'payBy' =>'required',
+        ]);
+    }
 }

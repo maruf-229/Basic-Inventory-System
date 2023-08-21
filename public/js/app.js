@@ -2853,6 +2853,10 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   });
 }), _defineProperty(_created$created$data, "data", function data() {
   return {
+    customer_id: '',
+    pay: '',
+    due: '',
+    payBy: '',
     products: [],
     categories: [],
     getProducts: [],
@@ -2957,6 +2961,28 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       var data = _ref6.data;
       return _this9.vats = data;
     })["catch"]();
+  },
+  orderDone: function orderDone() {
+    var _this10 = this;
+    var total = this.subtotal * this.vats.vat / 100 + this.subtotal;
+    var data = {
+      qty: this.qty,
+      subtotal: this.subtotal,
+      customer_id: this.customer_id,
+      pay: this.pay,
+      due: this.due,
+      payBy: this.payBy,
+      vat: this.vats.vat,
+      total: total
+    };
+    axios.post('/api/orderDone', data).then(function () {
+      Notification.success();
+      _this10.$router.push({
+        name: 'home'
+      });
+    })["catch"](function (error) {
+      return _this10.errors = error.response.data.errors;
+    });
   } //end cart methods
 }), _created$created$data);
 
@@ -6758,8 +6784,11 @@ var render = function render() {
   }, [_vm._v("Vat: "), _c("strong", [_vm._v(_vm._s(_vm.vats.vat) + "%")])]), _vm._v(" "), _c("li", {
     staticClass: "list-group-item d-flex justify-content-between align-items-center"
   }, [_vm._v("Total: "), _c("strong", [_vm._v(_vm._s(_vm.subtotal * _vm.vats.vat / 100 + _vm.subtotal))])])]), _vm._v(" "), _c("br"), _vm._v(" "), _c("form", {
-    attrs: {
-      action: ""
+    on: {
+      submit: function submit($event) {
+        $event.preventDefault();
+        return _vm.orderDone.apply(null, arguments);
+      }
     }
   }, [_c("label", {
     attrs: {
@@ -6790,7 +6819,10 @@ var render = function render() {
     }
   }, _vm._l(_vm.customers, function (customer) {
     return _c("option", {
-      key: customer.id
+      key: customer.id,
+      domProps: {
+        value: customer.id
+      }
     }, [_vm._v(_vm._s(customer.name))]);
   }), 0), _vm._v(" "), _c("label", {
     attrs: {

@@ -53,10 +53,10 @@
                         <li class="list-group-item d-flex justify-content-between align-items-center">Total: <strong>{{ subtotal*vats.vat/100 + subtotal }}</strong></li>
                     </ul>
                     <br>
-                    <form action="">
+                    <form @submit.prevent="orderDone">
                         <label for="">Customer Name</label>
                         <select name="" id="" class="form-control" v-model="customer_id">
-                            <option v-for="customer in customers" :key="customer.id">{{ customer.name }}</option>
+                            <option :value="customer.id" v-for="customer in customers" :key="customer.id">{{ customer.name }}</option>
                         </select>
 
                         <label for="">Pay</label>
@@ -167,6 +167,11 @@ export default{
     },
     data(){
         return{
+            customer_id:'',
+            pay:'',
+            due:'',
+            payBy:'',
+
             products:[],
             categories:[],
             getProducts:[],
@@ -268,6 +273,26 @@ export default{
             .then(({data}) => (this.vats = data))
             .catch()
         },
+        orderDone(){
+            let total = this.subtotal*this.vats.vat/100 + this.subtotal
+            var data = {
+                qty:this.qty,
+                subtotal:this.subtotal,
+                customer_id:this.customer_id,
+                pay:this.pay,
+                due:this.due,
+                payBy:this.payBy,
+                vat:this.vats.vat,
+                total:total
+            }
+
+            axios.post('/api/orderDone',data)
+            .then(()=> {
+                Notification.success()
+                this.$router.push({name: 'home'})
+            })
+            .catch(error => this.errors = error.response.data.errors)
+        }
         //end cart methods
     }
 }
