@@ -41,6 +41,17 @@ Route::get('/removeItem/{id}','Api\CartController@removeProduct');
 Route::get('/increament/{id}','Api\CartController@cartInceament');
 Route::get('/decreament/{id}','Api\CartController@cartDecrement');
 Route::get('/vats','Api\CartController@getVat');
-
+//order routes
 Route::post('/orderDone','Api\PosController@orderDone');
+Route::get('/orders','Api\Ordercontroller@todayOrders');
+Route::get('/order/details/{id}','Api\Ordercontroller@ordderDetails');
+Route::get('/order/order_details/{id}','Api\Ordercontroller@ordderDetailsAll');
+Route::post('/search/order','Api\Ordercontroller@searchOrderDate');
+
+//home routes
+Route::get('/today/sell','Api\PosController@todaysSell');
+Route::get('/today/income','Api\PosController@todaysIncome');
+Route::get('/today/due','Api\PosController@todaysDue');
+Route::get('/today/expense','Api\PosController@todayExpense');
+Route::get('/today/stockout','Api\PosController@stockout');
 

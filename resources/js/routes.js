@@ -44,8 +44,13 @@ let edit_salary = require('./components/salary/edit.vue').default;
 let stock = require('./components/product/stock.vue').default;
 let edit_stock = require('./components/product/edit_stock.vue').default;
 
-
+//pos routes
 let pos = require('./components/pos/pointofsale.vue').default;
+
+//order routes
+let order = require('./components/order/order.vue').default;
+let view_order = require('./components/order/view_order.vue').default;
+let search_order = require('./components/order/search_order.vue').default;
 
 export const routes = [
     { path: '/', component: login, name: '/' },
@@ -98,4 +103,9 @@ export const routes = [
 
     //pos routes
     { path: '/pos', component: pos, name: 'pos' },
+
+    //order routes
+    { path: '/order', component: order, name: 'order' },
+    { path: '/view-order/:id', component: view_order, name: 'view_order' },
+    { path: '/search_order', component: search_order, name: 'search_order' },
 ]
